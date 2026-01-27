@@ -52,29 +52,6 @@ LRESULT __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter,
             PostQuitMessage(0);
         }
             return 0;
-
-        case WM_LBUTTONDOWN: {
-            gui::position = MAKEPOINTS(longParameter);  // set click points
-        }
-            return 0;
-
-        case WM_MOUSEMOVE: {
-            if (wideParameter == MK_LBUTTON) {
-                const auto points = MAKEPOINTS(longParameter);
-                auto rect = ::RECT{};
-
-                GetWindowRect(gui::window, &rect);
-
-                rect.left += points.x - gui::position.x;
-                rect.top += points.y - gui::position.y;
-
-                if (gui::position.x >= 0 && gui::position.x <= gui::WIDTH && gui::position.y >= 0 &&
-                    gui::position.y <= 19)
-                    SetWindowPos(gui::window, HWND_TOPMOST, rect.left, rect.top, 0, 0,
-                                 SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOZORDER);
-            }
-        }
-            return 0;
     }
 
     return DefWindowProc(window, message, wideParameter, longParameter);
@@ -107,12 +84,16 @@ void gui::CreateHWindow(std::wstring_view title) {
         dpiScale = dpi / 96.0f;
     }
 
-    // Calculate DPI-scaled window size
-    const int scaledWidth = static_cast<int>(WIDTH * dpiScale);
-    const int scaledHeight = static_cast<int>(HEIGHT * dpiScale);
+    // get full screen size
+    const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    window = CreateWindowEx(0, windowClass.lpszClassName, title.data(), WS_POPUP, 100, 100, scaledWidth, scaledHeight,
-                            0, 0, windowClass.hInstance, 0);
+    // create window with WS_EX_LAYERED for transparency and WS_EX_TOPMOST
+    window = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST, windowClass.lpszClassName, title.data(), WS_POPUP, 0, 0,
+                            screenWidth, screenHeight, 0, 0, windowClass.hInstance, 0);
+
+    // this tells Windows that any black pixel in the window should be fully transparent.
+    SetLayeredWindowAttributes(window, RGB(0, 0, 0), 0, LWA_COLORKEY);
 
     ShowWindow(window, SW_SHOWDEFAULT);
     UpdateWindow(window);
@@ -240,7 +221,9 @@ void gui::EndRender() noexcept {
 
     ImGui::EndFrame();
 
-    constexpr float clear_color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    // clear color must be Pure Black (0,0,0) with 0 alpha to work with LWA_COLORKEY
+    constexpr float clear_color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+
     deviceContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
     deviceContext->ClearRenderTargetView(mainRenderTargetView, clear_color);
     ImGui::Render();
@@ -256,11 +239,11 @@ void gui::Render() noexcept {
         return;
     }
 
-    ImGui::SetNextWindowPos({0, 0});
-    ImGui::SetNextWindowSize({WIDTH * dpiScale, HEIGHT * dpiScale});
-    ImGui::Begin("imgui borderless window", &isRunning,
-                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse |
-                     ImGuiWindowFlags_NoMove);
+    // Set a default size only on the first run.
+    ImGui::SetNextWindowSize({500, 300}, ImGuiCond_FirstUseEver);
+
+    // flags removed (NoResize, NoMove) so you can resize/move the menu freely.
+    ImGui::Begin("imgui borderless window", &isRunning, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 
     ImGui::Text("youtube.com/@cazz");
     ImGui::Button("subscribe");

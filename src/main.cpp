@@ -7,7 +7,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE previousInstance, PWSTR argu
     gui::isDPIAware = true;
     gui::vSyncEnabled = true;
 
-    // create gui
+    // create gui (Full screen transparent overlay)
     gui::CreateHWindow(L"Cheat Menu");
     gui::CreateDevice();
     gui::CreateImGui();

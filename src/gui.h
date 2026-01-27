@@ -3,9 +3,7 @@
 #include <d3d11.h>
 
 namespace gui {
-    // constant window size (logical pixels)
-    constexpr int WIDTH = 500;
-    constexpr int HEIGHT = 300;
+    /* removed WIDTH, HEIGHT, and position (no longer needed for overlay) */
 
     // Configuration flags
     inline bool isDPIAware = true;
@@ -18,9 +16,6 @@ namespace gui {
     // winapi window vars
     inline HWND window = nullptr;
     inline WNDCLASSEX windowClass = {};
-
-    // points for window movement
-    inline POINTS position = {};
 
     // direct x state vars
     inline ID3D11Device* device = nullptr;
