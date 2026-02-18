@@ -155,7 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\gui.h" />
+    <ClInclude Include="src\gui\gui.h" />
     <ClInclude Include="external\imgui-legacy\imconfig.h" />
     <ClInclude Include="external\imgui-legacy\imgui.h" />
     <ClInclude Include="external\imgui-legacy\imgui_impl_dx11.h" />
@@ -166,7 +166,8 @@
     <ClInclude Include="external\imgui-legacy\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\gui.cpp" />
+    <ClCompile Include="src\gui\gui.cpp" />
+    <ClCompile Include="src\gui\menu.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="external\imgui-legacy\imgui.cpp" />
     <ClCompile Include="external\imgui-legacy\imgui_demo.cpp" />
